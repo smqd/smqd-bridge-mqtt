@@ -23,10 +23,16 @@ val `smqd-bridge-mqtt` = project.in(file(".")).settings(
   libraryDependencies ++= Seq(
     "t2x.smqd" %% "smqd-core" % smqdCoreVersion
   )
-).settings{
+).settings(
+  // Publishing
+  publishTo := Some(
+    "bintray" at "https://api.bintray.com/maven/smqd/"+"smqd/smqd-bridge-mqtt_2.12/;publish=1"),
+  credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
+  publishMavenStyle := true
+).settings(
   //// Test
   libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
     "org.scalatest" %% "scalatest" % "3.0.5" % Test
   )
-}
+)
