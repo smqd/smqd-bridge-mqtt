@@ -1,8 +1,12 @@
 # SMQD MQTT Bridge
 
+[![Build Status](https://travis-ci.org/smqd/smqd-bridge-mqtt.svg?branch=develop)](https://travis-ci.org/smqd/smqd-bridge-mqtt)
+
 ## Usage
 
 ```scala
+    resolvers += Resolver.bintrayRepo("smqd", "smqd")
+
     libraryDependencies += "t2x.smqd" %% "smqd-bridge-mqtt" % "0.1.0"
 ```
 
