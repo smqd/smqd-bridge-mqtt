@@ -1,7 +1,9 @@
 # SMQD MQTT Bridge
 
+## Usage
+
 ```scala
-    libraryDependencies += "t2x.smqd" %% "smqd-bridge-mqtt" % "0.1.0-SNAPSHOT"
+    libraryDependencies += "t2x.smqd" %% "smqd-bridge-mqtt" % "0.1.0"
 ```
 
 ## Configuration
