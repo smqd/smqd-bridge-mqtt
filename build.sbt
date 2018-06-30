@@ -35,7 +35,7 @@ val `smqd-bridge-mqtt` = project.in(file(".")).settings(
   },
   credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials"),
   homepage := Some(url("https://github.com/smqd/")),
-  scmInfo := Some(ScmInfo(url("https://github.com/smqd/smqd-core"), "scm:git@github.com:smqd/smqd-core.git")),
+  scmInfo := Some(ScmInfo(url("https://github.com/smqd/smqd-bridge-mqtt"), "scm:git@github.com:smqd/smqd-bridge-mqtt.git")),
   developers := List(
     Developer("OutOfBedlam", "Kwon, Yeong Eon", "eirny@uangel.com", url("http://www.uangel.com"))
   ),
