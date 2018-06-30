@@ -1,6 +1,7 @@
 target/
 project/project/
 .idea/
+local.*
 .history
 .metadata
 .project
@@ -23,6 +24,7 @@ src/main/resources/VERSION.NFO
 Californium.properties
 package-lock.json
 .sbtopts
+src/main/resources/smqd-bridge-mqtt-version.conf
 
 # macOS
 .DS_Store
