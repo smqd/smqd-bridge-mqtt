@@ -78,9 +78,7 @@ class MqttBridgeDriver(name: String, smqd: Smqd, config: Config) extends Abstrac
 
     logger.debug(s"MqttBridgeDriver($name) keepAliveInterval: ${connectionSettings.keepAliveInterval.toSeconds} seconds")
 
-    implicit val system: ActorSystem = smqd.system
-    implicit val ec: ExecutionContext = smqd.gloablDispatcher
-    implicit val materializer: ActorMaterializer = ActorMaterializer()
+    import smqd.Implicit._
 
     // Materialization with SourceQueue
     //   refer = https://stackoverflow.com/questions/30964824/how-to-create-a-source-that-can-receive-elements-later-via-a-method-call
