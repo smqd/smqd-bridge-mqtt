@@ -3,7 +3,7 @@ import sbt.Keys.{version, _}
 
 import scala.sys.process._
 
-val smqdVersion = "0.3.1-SNAPSHOT"
+val smqdVersion = "0.3.2"
 val akkaVersion = "2.5.13"
 val alpakkaVersion = "0.19"
 
@@ -21,7 +21,7 @@ val `smqd-bridge-mqtt` = project.in(file(".")).settings(
   scalaVersion := "2.12.6"
 ).settings(
   libraryDependencies ++= Seq(
-    "com.thing2x" %% "smqd-core" % "0.3.1-SNAPSHOT"
+    "com.thing2x" %% "smqd-core" % smqdVersion
   ),
   resolvers += Resolver.sonatypeRepo("public")
 ).settings(
