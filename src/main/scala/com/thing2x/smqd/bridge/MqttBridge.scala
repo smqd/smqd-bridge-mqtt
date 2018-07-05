@@ -21,6 +21,7 @@ import akka.stream.alpakka.mqtt.{MqttConnectionSettings, MqttMessage, MqttQoS}
 import akka.stream.scaladsl._
 import akka.util.ByteString
 import com.thing2x.smqd._
+import com.thing2x.smqd.plugin.SmqBridgeDriverPlugin
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.StrictLogging
 import io.netty.buffer.ByteBuf
@@ -33,7 +34,7 @@ import scala.util.{Failure, Success}
 /**
   * 2018. 6. 22. - Created by Kwon, Yeong Eon
   */
-class MqttBridgeDriver(name: String, smqd: Smqd, config: Config) extends AbstractBridgeDriver(name, smqd, config) with StrictLogging {
+class MqttBridgeDriver(name: String, smqd: Smqd, config: Config) extends SmqBridgeDriverPlugin(name, smqd, config) with StrictLogging {
 
   private var source: Option[SourceQueueWithComplete[MqttMessage]] = None
 

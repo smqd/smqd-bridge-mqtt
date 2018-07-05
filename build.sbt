@@ -3,7 +3,7 @@ import sbt.Keys.{version, _}
 
 import scala.sys.process._
 
-val smqdVersion = "0.3.2"
+val smqdVersion = "0.3.3-SNAPSHOT"
 val akkaVersion = "2.5.13"
 val alpakkaVersion = "0.19"
 
