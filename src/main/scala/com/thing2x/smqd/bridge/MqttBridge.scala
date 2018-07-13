@@ -28,14 +28,15 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-/**
-  * 2018. 6. 22. - Created by Kwon, Yeong Eon
-  */
-class MqttBridgeDriver(name: String, smqd: Smqd, config: Config) extends BridgeDriver(name, smqd, config) with StrictLogging {
+// 2018. 6. 22. - Created by Kwon, Yeong Eon
+
+class MqttBridgeDriver(name: String, smqdInstance: Smqd, config: Config) extends BridgeDriver(name, smqdInstance, config) with StrictLogging {
 
   private var source: Option[SourceQueueWithComplete[MqttMessage]] = None
 
-  override protected def createBridge(filterPath: FilterPath, bridgeConf: Config, index: Long): Bridge = {
+  override protected def createBridge(bridgeConf: Config, index: Long): Bridge = {
+    val topic = config.getString("topic")
+    val filterPath = FilterPath(topic)
     val prefix = config.getOptionString("prefix")
     val suffix = config.getOptionString("suffix")
     val qos = if (config.hasPath("qos")){
@@ -49,7 +50,9 @@ class MqttBridgeDriver(name: String, smqd: Smqd, config: Config) extends BridgeD
       MqttQoS.atMostOnce
     }
 
-    new MqttBridge(this, index, filterPath, qos, prefix, suffix)
+    new MqttBridge(this, index, filterPath, qos,
+      if (prefix.isDefined && prefix.get.length > 0) prefix else None,
+      if (suffix.isDefined && suffix.get.length > 0) suffix else None)
   }
 
   override protected def connect(): Unit = {
@@ -76,7 +79,7 @@ class MqttBridgeDriver(name: String, smqd: Smqd, config: Config) extends BridgeD
 
     logger.debug(s"MqttBridgeDriver($name) keepAliveInterval: ${connectionSettings.keepAliveInterval.toSeconds} seconds")
 
-    import this.smqd.Implicit._
+    import this.smqdInstance.Implicit._
     // Materialization with SourceQueue
     //   refer = https://stackoverflow.com/questions/30964824/how-to-create-a-source-that-can-receive-elements-later-via-a-method-call
     val queue = Source.queue[MqttMessage](queueSize, overflowStrategy)

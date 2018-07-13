@@ -1,27 +1,22 @@
 
 import sbt.Keys.{version, _}
 
-import scala.sys.process._
-
+val thisVersion = "0.4.0-SNAPSHOT"
 val smqdVersion = "0.4.0-SNAPSHOT"
 val akkaVersion = "2.5.13"
 val alpakkaVersion = "0.19"
 
-lazy val gitBranch = "git rev-parse --abbrev-ref HEAD".!!.trim
-lazy val gitCommitShort = "git rev-parse HEAD | cut -c 1-7".!!.trim
-lazy val gitCommitFull = "git rev-parse HEAD".!!.trim
-
-val versionFile       = s"echo version = $smqdVersion" #> file("src/main/resources/smqd-bridge-mqtt-version.conf") !
-val commitVersionFile = s"echo commit-version = $gitCommitFull" #>> file("src/main/resources/smqd-bridge-mqtt-version.conf") !
-
 val `smqd-bridge-mqtt` = project.in(file(".")).settings(
   organization := "com.thing2x",
   name := "smqd-bridge-mqtt",
-  version := smqdVersion,
+  version := thisVersion,
   scalaVersion := "2.12.6"
 ).settings(
   libraryDependencies ++= Seq(
-    "com.thing2x" %% "smqd-core" % smqdVersion
+    if (smqdVersion.endsWith("-SNAPSHOT"))
+      "com.thing2x" %% "smqd-core" % smqdVersion changing() withSources()
+    else
+      "com.thing2x" %% "smqd-core" % smqdVersion
   ),
   resolvers += Resolver.sonatypeRepo("public")
 ).settings(

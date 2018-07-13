@@ -24,7 +24,7 @@ src/main/resources/VERSION.NFO
 Californium.properties
 package-lock.json
 .sbtopts
-src/main/resources/smqd-bridge-mqtt-version.conf
+src/test/conf/plugins
 
 # macOS
 .DS_Store
