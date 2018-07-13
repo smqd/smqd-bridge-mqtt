@@ -19,29 +19,28 @@ smqd {
     drivers = [
       {
         name = mqtt_br
-        class = com.thing2x.smqd.bridge.MqttBridgeDriver
-        destination = "127.0.0.1:1883"
-        client-id = bridge_client
-        user = userx
-        password = userpassword
-        queue = 20
-        overflow-strategy = drop-buffer
-        keep-alive-interval = 10s
-      }
-    ]
-
-    bridges = [
-      {
-        topic = "sensor/+/temperature"
-        driver = mqtt_br
-        qos = 0
-      },
-      {
-        topic = "sensor/+/humidity"
-        driver = mqtt_br
-        prefix = "bridged/data/"
-        suffix = "/json"
-        qos = 1
+        entry.plugin = com.thing2x.smqd.bridge.MqttBridgeDriver
+        config {
+            destination = "127.0.0.1:1883"
+            client-id = bridge_client
+            user = userid
+            password = userpassword
+            queue = 20
+            overflow-strategy = drop-buffer
+            keep-alive-interval = 10s
+            bridges = [
+                {
+                  topic = "sensor/+/temperature"
+                  qos = 0
+                },
+                {
+                  topic = "sensor/+/humidity"
+                  prefix = "bridged/data/"
+                  suffix = "/json"
+                  qos = 1
+                }
+              ] 
+        }
       }
     ]
   }
@@ -90,10 +89,6 @@ smqd {
 - _topic_
 
     topic filter that the bridge will subscribe
-
-- _driver_
-
-    should be name of http bridge driver
 
 - _prefix_ & _suffix_
 
