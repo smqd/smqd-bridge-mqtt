@@ -1,8 +1,8 @@
 
 import sbt.Keys.{version, _}
 
-val thisVersion = "0.4.0-SNAPSHOT"
-val smqdVersion = "0.4.0-SNAPSHOT"
+val thisVersion = "0.4.0"
+val smqdVersion = "0.4.0"
 val akkaVersion = "2.5.13"
 val alpakkaVersion = "0.19"
 
