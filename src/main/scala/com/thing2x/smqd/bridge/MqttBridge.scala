@@ -14,17 +14,21 @@
 
 package com.thing2x.smqd.bridge
 
+import akka.actor.ActorSystem
+import akka.stream.Materializer
 import akka.stream.alpakka.mqtt.scaladsl.MqttSink
 import akka.stream.alpakka.mqtt.{MqttConnectionSettings, MqttMessage, MqttQoS}
 import akka.stream.scaladsl._
 import akka.util.ByteString
 import com.thing2x.smqd._
 import com.thing2x.smqd.plugin._
+import com.thing2x.smqd.util.ConfigUtil._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.StrictLogging
 import io.netty.buffer.ByteBuf
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
@@ -56,6 +60,11 @@ class MqttBridgeDriver(name: String, smqdInstance: Smqd, config: Config) extends
   }
 
   override protected def connect(): Unit = {
+
+    implicit val ec: ExecutionContext = smqdInstance.Implicit.gloablDispatcher
+    implicit val actorSystem: ActorSystem = smqdInstance.Implicit.system
+    implicit val materializer: Materializer = smqdInstance.Implicit.materializer
+    
     val queueSize: Int = config.getOptionInt("queue").getOrElse(20)
     val destination = config.getString("destination")
     val clientId = config.getOptionString("client-id").getOrElse(s"MqttBridge-$name")
@@ -78,8 +87,6 @@ class MqttBridgeDriver(name: String, smqdInstance: Smqd, config: Config) extends
       .withCleanSession(true)
 
     logger.debug(s"MqttBridgeDriver($name) keepAliveInterval: ${connectionSettings.keepAliveInterval.toSeconds} seconds")
-
-    import this.smqdInstance.Implicit._
     // Materialization with SourceQueue
     //   refer = https://stackoverflow.com/questions/30964824/how-to-create-a-source-that-can-receive-elements-later-via-a-method-call
     val queue = Source.queue[MqttMessage](queueSize, overflowStrategy)
