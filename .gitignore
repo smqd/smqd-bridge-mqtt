@@ -25,6 +25,7 @@ Californium.properties
 package-lock.json
 .sbtopts
 src/test/conf/plugins
+src/test/conf/passwd
 
 # macOS
 .DS_Store

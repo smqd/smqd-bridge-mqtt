@@ -15,7 +15,7 @@
 package com.thing2x.smqd.bridge
 
 import akka.actor.ActorSystem
-import akka.stream.Materializer
+import akka.stream.{Materializer, QueueOfferResult}
 import akka.stream.alpakka.mqtt.scaladsl.MqttSink
 import akka.stream.alpakka.mqtt.{MqttConnectionSettings, MqttMessage, MqttQoS}
 import akka.stream.scaladsl._
@@ -39,12 +39,12 @@ class MqttBridgeDriver(name: String, smqdInstance: Smqd, config: Config) extends
   private var source: Option[SourceQueueWithComplete[MqttMessage]] = None
 
   override protected def createBridge(bridgeConf: Config, index: Long): Bridge = {
-    val topic = config.getString("topic")
+    val topic = bridgeConf.getString("topic")
     val filterPath = FilterPath(topic)
-    val prefix = config.getOptionString("prefix")
-    val suffix = config.getOptionString("suffix")
-    val qos = if (config.hasPath("qos")){
-      config.getInt("qos") match {
+    val prefix = bridgeConf.getOptionString("prefix")
+    val suffix = bridgeConf.getOptionString("suffix")
+    val qos = if (bridgeConf.hasPath("qos")){
+      bridgeConf.getInt("qos") match {
         case 1 => MqttQoS.atLeastOnce
         case 2 => MqttQoS.exactlyOnce
         case _ => MqttQoS.atMostOnce
@@ -86,14 +86,15 @@ class MqttBridgeDriver(name: String, smqdInstance: Smqd, config: Config) extends
       .withAutomaticReconnect(true)
       .withCleanSession(true)
 
-    logger.debug(s"MqttBridgeDriver($name) keepAliveInterval: ${connectionSettings.keepAliveInterval.toSeconds} seconds")
+    logger.debug(s"MqttBridgeDriver($name) overflow-strategy: $overflowStrategy")
+    logger.debug(s"MqttBridgeDriver($name) keep-alive-interval: ${connectionSettings.keepAliveInterval.toSeconds} seconds")
     // Materialization with SourceQueue
     //   refer = https://stackoverflow.com/questions/30964824/how-to-create-a-source-that-can-receive-elements-later-via-a-method-call
     val queue = Source.queue[MqttMessage](queueSize, overflowStrategy)
-      .map{ m =>
-        logger.trace(s"MqttBridgeDriver($name) publish qos: ${m.qos.getOrElse(MqttQoS.AtMostOnce).byteValue}, topic: ${m.topic}, payload: ${m.payload.length} bytes")
-        m
-      }
+//      .map{ m =>
+//        logger.trace(s"MqttBridgeDriver($name) publish qos: ${m.qos.getOrElse(MqttQoS.AtMostOnce).byteValue}, topic: ${m.topic}, payload: ${m.payload.length} bytes")
+//        m
+//      }
       .to(MqttSink(connectionSettings, MqttQoS.atMostOnce))
       .run()
 
@@ -135,9 +136,18 @@ class MqttBridgeDriver(name: String, smqdInstance: Smqd, config: Config) extends
         val topic = bridge.prefix.getOrElse("") + topicPath.toString + bridge.suffix.getOrElse("")
         val qos = bridge.qos
 
-        queue.offer(new MqttMessage(topic, byteString, Some(qos)))
+        implicit val ec: ExecutionContext = smqdInstance.Implicit.gloablDispatcher
 
-        logger.trace(s"MqttBridgeDriver($name) queue offer, qos: ${qos.byteValue}, topic: $topic, payload: ${byteString.length} bytes")
+        queue.offer(new MqttMessage(topic, byteString, Some(qos))).map {
+          case QueueOfferResult.Enqueued =>
+            logger.trace(s"MqttBridgeDriver($name)   offer qos: ${qos.byteValue}, topic: $topic, payload: ${byteString.length} bytes")
+          case QueueOfferResult.Dropped =>
+            logger.trace(s"MqttBridgeDriver($name)    drop qos: ${qos.byteValue}, topic: $topic, payload: ${byteString.length} bytes")
+          case QueueOfferResult.QueueClosed =>
+            logger.trace(s"MqttBridgeDriver($name)  closed qos: ${qos.byteValue}, topic: $topic, payload: ${byteString.length} bytes")
+          case QueueOfferResult.Failure(ex) =>
+            logger.trace(s"MqttBridgeDriver($name)  failed qos: ${qos.byteValue}, topic: $topic, payload: ${byteString.length} bytes", ex)
+        }
 
       case _ =>
         logger.warn(s"MqttBridgeDriver($name) is not conntected, messages for '${topicPath.toString}' will be discarded")
@@ -145,6 +155,7 @@ class MqttBridgeDriver(name: String, smqdInstance: Smqd, config: Config) extends
   }
 
   override def disconnect(): Unit = {
+    logger.info(s"MqttBridgeDriver($name) disconnect")
     if (source.isDefined)
       source.get.complete()
     source = None

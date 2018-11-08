@@ -2,9 +2,11 @@
 import sbt.Keys.{version, _}
 
 val thisVersion = "0.5.0-SNAPSHOT"
-val smqdVersion = "0.4.2-SNAPSHOT"
-val akkaVersion = "2.5.13"
-val alpakkaVersion = "0.19"
+val smqdVersion = "[0.4.7, 0.5)"
+//val smqdVersion = "0.4.8-SNAPSHOT"
+
+val akkaVersion = "2.5.17"
+val alpakkaVersion = "0.20"
 
 val `smqd-bridge-mqtt` = project.in(file(".")).settings(
   organization := "com.thing2x",
@@ -14,9 +16,9 @@ val `smqd-bridge-mqtt` = project.in(file(".")).settings(
 ).settings(
   libraryDependencies ++= Seq(
     if (smqdVersion.endsWith("-SNAPSHOT"))
-      "com.thing2x" %% "smqd-core" % smqdVersion changing() withSources()
+      "com.thing2x" %% "smqd-core" % smqdVersion % Provided changing() withSources()
     else
-      "com.thing2x" %% "smqd-core" % smqdVersion
+      "com.thing2x" %% "smqd-core" % smqdVersion % Provided
   ),
   resolvers += Resolver.sonatypeRepo("public")
 ).settings(
